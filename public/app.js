@@ -25,6 +25,24 @@ const statusLabels = {
   healthy: "ổn"
 };
 
+const csvTemplates = {
+  products: [
+    "sku,name,category,cost,target_margin",
+    "AO-THUN-01,Ao thun basic,Thoi trang,65000,0.3",
+    "SON-01,Son kem mini,My pham,72000,0.28"
+  ].join("\n"),
+  orders: [
+    "id,date,channel,sku,quantity,sale_price,platform_fee,shipping_fee,discount,cod_status,status",
+    "DH001,2026-05-20,Shopee,AO-THUN-01,2,129000,18000,15000,10000,received,delivered",
+    "DH002,2026-05-21,TikTok Shop,SON-01,1,149000,16000,12000,0,pending,delivered"
+  ].join("\n"),
+  ads: [
+    "id,date,channel,campaign,sku,amount",
+    "ADS001,2026-05-20,TikTok Shop,Live 20/5,SON-01,250000",
+    "ADS002,2026-05-21,Shopee,Search Ads,AO-THUN-01,120000"
+  ].join("\n")
+};
+
 function formatMoney(value) {
   return currency.format(Math.round(Number(value || 0)));
 }
@@ -60,7 +78,7 @@ async function load() {
 function renderShop() {
   const shop = state.data.shop || {};
   document.querySelector("#shopTitle").textContent = shop.name ? `Thông tin shop: ${shop.name}` : "Thông tin shop";
-  document.querySelector("#shopMeta").textContent = [shop.category, shop.owner ? `phụ trách: ${shop.owner}` : ""].filter(Boolean).join(" · ") || "Thiết lập shop trước, sau đó nhập đơn hàng và chi phí.";
+  document.querySelector("#shopMeta").textContent = [shop.category, shop.owner ? `phụ trách: ${shop.owner}` : ""].filter(Boolean).join(" - ") || "Thiết lập shop trước, sau đó nhập đơn hàng và chi phí.";
   document.querySelector("#shopName").value = shop.name || "";
   document.querySelector("#shopOwner").value = shop.owner || "";
   document.querySelector("#shopCategory").value = shop.category || "";
@@ -187,6 +205,45 @@ document.querySelector("#orderForm").addEventListener("submit", async (event) =>
   form.reset();
   form.elements.date.value = new Date().toISOString().slice(0, 10);
   await load();
+});
+
+document.querySelectorAll(".template-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    const form = button.closest(".import-card");
+    form.elements.csv.value = csvTemplates[button.dataset.template];
+  });
+});
+
+document.querySelectorAll(".csv-file").forEach((input) => {
+  input.addEventListener("change", async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const form = input.closest(".import-card");
+    form.elements.csv.value = await file.text();
+  });
+});
+
+document.querySelectorAll(".import-card").forEach((form) => {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const type = form.dataset.import;
+    const result = form.querySelector(".import-result");
+    result.textContent = "Đang nhập...";
+    try {
+      const response = await api(`/api/import/${type}`, {
+        method: "POST",
+        body: JSON.stringify({
+          csv: form.elements.csv.value,
+          mode: form.elements.replace.checked ? "replace" : "append"
+        })
+      });
+      const errorText = response.errors?.length ? ` Lỗi: ${response.errors.join("; ")}` : "";
+      result.textContent = `Đã thêm ${response.created}, cập nhật ${response.updated}.${errorText}`;
+      await load();
+    } catch (error) {
+      result.textContent = `Không nhập được: ${error.message}`;
+    }
+  });
 });
 
 document.querySelector("#resetButton").addEventListener("click", async () => {

@@ -54,7 +54,96 @@ function collectBody(req) {
 }
 
 function money(value) {
-  return Number(value || 0);
+  if (typeof value === "number") return value;
+  const cleaned = String(value || "")
+    .replace(/[^\d,.-]/g, "")
+    .replace(/\.(?=\d{3}(\D|$))/g, "")
+    .replace(",", ".");
+  return Number(cleaned || 0);
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let cell = "";
+  let row = [];
+  let quoted = false;
+  const input = String(text || "").replace(/^\uFEFF/, "");
+
+  for (let i = 0; i < input.length; i += 1) {
+    const char = input[i];
+    const next = input[i + 1];
+    if (char === '"' && quoted && next === '"') {
+      cell += '"';
+      i += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      row.push(cell.trim());
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") i += 1;
+      row.push(cell.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell.trim());
+  if (row.some(Boolean)) rows.push(row);
+  if (rows.length < 2) return [];
+
+  const headers = rows[0].map((header) => normalizeHeader(header));
+  return rows.slice(1).map((values) => {
+    const item = {};
+    headers.forEach((header, index) => {
+      item[header] = values[index] ?? "";
+    });
+    return item;
+  });
+}
+
+function normalizeHeader(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function pick(row, keys, fallback = "") {
+  for (const key of keys) {
+    const normalized = normalizeHeader(key);
+    if (row[normalized] !== undefined && row[normalized] !== "") return row[normalized];
+  }
+  return fallback;
+}
+
+function normalizeOrderStatus(value) {
+  const text = normalizeHeader(value);
+  if (["hoan", "hoan_hang", "returned", "return"].includes(text)) return "returned";
+  if (["huy", "da_huy", "cancelled", "canceled", "cancel"].includes(text)) return "cancelled";
+  return "delivered";
+}
+
+function normalizeCodStatus(value) {
+  const text = normalizeHeader(value);
+  if (["da_nhan", "received", "paid", "done"].includes(text)) return "received";
+  return "pending";
+}
+
+function upsertBy(array, key, item) {
+  const index = array.findIndex((entry) => String(entry[key]).toLowerCase() === String(item[key]).toLowerCase());
+  if (index >= 0) {
+    array[index] = { ...array[index], ...item };
+    return "updated";
+  }
+  array.unshift(item);
+  return "created";
 }
 
 function orderMath(order, product, adShare = 0) {
@@ -326,6 +415,105 @@ async function handleApi(req, res) {
     db.adCosts.unshift(ad);
     writeDb(db);
     return send(res, 201, ad);
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/import/products") {
+    const body = JSON.parse(await collectBody(req) || "{}");
+    const rows = parseCsv(body.csv);
+    let created = 0;
+    let updated = 0;
+    const errors = [];
+    if (body.mode === "replace") db.products = [];
+
+    rows.forEach((row, index) => {
+      const sku = pick(row, ["sku", "ma_sku", "ma_hang", "ma_san_pham"]).trim();
+      const name = pick(row, ["name", "ten_san_pham", "san_pham", "product"]).trim();
+      if (!sku || !name) {
+        errors.push(`Dong ${index + 2}: thieu SKU hoac ten san pham`);
+        return;
+      }
+      const result = upsertBy(db.products, "sku", {
+        id: `sku-${sku.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        sku,
+        name,
+        category: pick(row, ["category", "nganh_hang", "nhom_hang"], "General"),
+        cost: money(pick(row, ["cost", "gia_von", "gia_nhap"], 0)),
+        targetMargin: money(pick(row, ["target_margin", "bien_muc_tieu"], 0.25))
+      });
+      if (result === "created") created += 1;
+      else updated += 1;
+    });
+
+    writeDb(db);
+    return send(res, 200, { created, updated, errors });
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/import/orders") {
+    const body = JSON.parse(await collectBody(req) || "{}");
+    const rows = parseCsv(body.csv);
+    let created = 0;
+    let updated = 0;
+    const errors = [];
+    if (body.mode === "replace") db.orders = [];
+
+    rows.forEach((row, index) => {
+      const sku = pick(row, ["sku", "ma_sku", "ma_hang", "ma_san_pham"]).trim();
+      if (!sku) {
+        errors.push(`Dong ${index + 2}: thieu SKU`);
+        return;
+      }
+      const id = pick(row, ["id", "order_id", "ma_don", "ma_don_hang"], safeId("ORD"));
+      const result = upsertBy(db.orders, "id", {
+        id,
+        date: pick(row, ["date", "ngay", "ngay_dat"], new Date().toISOString().slice(0, 10)),
+        channel: pick(row, ["channel", "kenh", "kenh_ban"], "Nhap tay"),
+        sku,
+        quantity: money(pick(row, ["quantity", "qty", "so_luong", "sl"], 1)),
+        salePrice: money(pick(row, ["sale_price", "gia_ban", "don_gia"], 0)),
+        platformFee: money(pick(row, ["platform_fee", "phi_san", "phi"], 0)),
+        shippingFee: money(pick(row, ["shipping_fee", "ship_shop_chiu", "phi_ship"], 0)),
+        discount: money(pick(row, ["discount", "giam_gia", "voucher"], 0)),
+        codStatus: normalizeCodStatus(pick(row, ["cod_status", "cod", "doi_soat"], "pending")),
+        status: normalizeOrderStatus(pick(row, ["status", "trang_thai", "trang_thai_don"], "delivered"))
+      });
+      if (result === "created") created += 1;
+      else updated += 1;
+    });
+
+    writeDb(db);
+    return send(res, 200, { created, updated, errors });
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/import/ads") {
+    const body = JSON.parse(await collectBody(req) || "{}");
+    const rows = parseCsv(body.csv);
+    let created = 0;
+    let updated = 0;
+    const errors = [];
+    if (body.mode === "replace") db.adCosts = [];
+
+    rows.forEach((row, index) => {
+      const sku = pick(row, ["sku", "ma_sku", "ma_hang", "ma_san_pham"]).trim();
+      const amount = money(pick(row, ["amount", "chi_phi", "ad_spend", "tien_ads"], 0));
+      if (!sku || !amount) {
+        errors.push(`Dong ${index + 2}: thieu SKU hoac chi phi ads`);
+        return;
+      }
+      const id = pick(row, ["id", "ads_id", "ma_chien_dich"], safeId("ADS"));
+      const result = upsertBy(db.adCosts, "id", {
+        id,
+        date: pick(row, ["date", "ngay"], new Date().toISOString().slice(0, 10)),
+        channel: pick(row, ["channel", "kenh", "kenh_ads"], "Manual"),
+        campaign: pick(row, ["campaign", "chien_dich", "ten_chien_dich"], "Chi phi ads"),
+        amount,
+        sku
+      });
+      if (result === "created") created += 1;
+      else updated += 1;
+    });
+
+    writeDb(db);
+    return send(res, 200, { created, updated, errors });
   }
 
   if (req.method === "POST" && url.pathname === "/api/reset") {

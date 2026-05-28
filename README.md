@@ -24,6 +24,7 @@ Bản hiện tại có form nhập đơn thủ công để chứng minh workflow
 ## Tính năng MVP
 
 - Thiết lập thông tin shop: tên shop, chủ shop, ngành hàng.
+- Import CSV cho sản phẩm/giá vốn, đơn hàng và chi phí quảng cáo.
 - Dashboard doanh thu, lãi/lỗ thật, biên lãi ròng, COD treo, tỷ lệ hoàn.
 - Phân tích lãi theo kênh bán.
 - Phân tích lãi theo SKU/sản phẩm.
@@ -32,6 +33,59 @@ Bản hiện tại có form nhập đơn thủ công để chứng minh workflow
 - Xuất CSV đơn hàng.
 - Xuất báo cáo Markdown.
 - Chạy local, không cần tài khoản, không cần API trả phí.
+
+## Quy trình dùng thật cho một shop
+
+1. Vào app và điền **Thông tin shop**.
+2. Chuẩn bị file sản phẩm từ Excel hoặc sổ kho:
+
+```csv
+sku,name,category,cost,target_margin
+AO-THUN-01,Ao thun basic,Thoi trang,65000,0.3
+SON-01,Son kem mini,My pham,72000,0.28
+```
+
+3. Chuẩn bị file đơn hàng từ báo cáo sàn hoặc bảng chốt đơn:
+
+```csv
+id,date,channel,sku,quantity,sale_price,platform_fee,shipping_fee,discount,cod_status,status
+DH001,2026-05-20,Shopee,AO-THUN-01,2,129000,18000,15000,10000,received,delivered
+DH002,2026-05-21,TikTok Shop,SON-01,1,149000,16000,12000,0,pending,delivered
+```
+
+4. Chuẩn bị file chi phí ads:
+
+```csv
+id,date,channel,campaign,sku,amount
+ADS001,2026-05-20,TikTok Shop,Live 20/5,SON-01,250000
+ADS002,2026-05-21,Shopee,Search Ads,AO-THUN-01,120000
+```
+
+5. Chọn file CSV hoặc dán từng CSV vào app. Nếu muốn dùng dữ liệu thật thay dữ liệu demo, tick **Xóa dữ liệu cũ trước khi nhập**.
+6. Xem dashboard để biết SKU/kênh nào đang lỗ, COD nào còn treo, tỷ lệ hoàn có cao không.
+7. Xuất báo cáo Markdown hoặc CSV để lưu lại theo tháng.
+
+## Cột CSV được hỗ trợ
+
+Sản phẩm:
+
+```text
+sku, name, category, cost, target_margin
+```
+
+Đơn hàng:
+
+```text
+id, date, channel, sku, quantity, sale_price, platform_fee, shipping_fee, discount, cod_status, status
+```
+
+Chi phí ads:
+
+```text
+id, date, channel, campaign, sku, amount
+```
+
+`cod_status` dùng `received` hoặc `pending`. `status` dùng `delivered`, `returned`, hoặc `cancelled`.
 
 ## Cách chạy
 

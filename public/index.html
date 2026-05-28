@@ -21,6 +21,70 @@
     </header>
 
     <main>
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Nhập dữ liệu thực tế bằng CSV</h2>
+            <p>Copy từ Excel/Google Sheets hoặc file export của sàn, dán vào đúng ô rồi bấm nhập. Có thể nhập đè dữ liệu demo để dùng cho shop thật.</p>
+          </div>
+        </div>
+        <div class="import-grid">
+          <form class="import-card" data-import="products">
+            <div>
+              <h3>1. Sản phẩm và giá vốn</h3>
+              <p>Nhập trước để app biết mỗi SKU có giá vốn bao nhiêu.</p>
+            </div>
+            <input class="csv-file" type="file" accept=".csv,text/csv">
+            <textarea name="csv" spellcheck="false"></textarea>
+            <label class="checkline">
+              <input name="replace" type="checkbox">
+              Xóa danh sách cũ trước khi nhập
+            </label>
+            <div class="import-actions">
+              <button class="button ghost template-button" type="button" data-template="products">Dán mẫu</button>
+              <button class="button primary" type="submit">Nhập sản phẩm</button>
+            </div>
+            <p class="import-result"></p>
+          </form>
+
+          <form class="import-card" data-import="orders">
+            <div>
+              <h3>2. Đơn hàng</h3>
+              <p>Điền doanh thu, phí, ship, voucher, COD và trạng thái đơn.</p>
+            </div>
+            <input class="csv-file" type="file" accept=".csv,text/csv">
+            <textarea name="csv" spellcheck="false"></textarea>
+            <label class="checkline">
+              <input name="replace" type="checkbox">
+              Xóa đơn cũ trước khi nhập
+            </label>
+            <div class="import-actions">
+              <button class="button ghost template-button" type="button" data-template="orders">Dán mẫu</button>
+              <button class="button primary" type="submit">Nhập đơn</button>
+            </div>
+            <p class="import-result"></p>
+          </form>
+
+          <form class="import-card" data-import="ads">
+            <div>
+              <h3>3. Chi phí quảng cáo</h3>
+              <p>Phân bổ ads theo SKU để thấy sản phẩm nào đang bị đốt tiền.</p>
+            </div>
+            <input class="csv-file" type="file" accept=".csv,text/csv">
+            <textarea name="csv" spellcheck="false"></textarea>
+            <label class="checkline">
+              <input name="replace" type="checkbox">
+              Xóa chi phí ads cũ trước khi nhập
+            </label>
+            <div class="import-actions">
+              <button class="button ghost template-button" type="button" data-template="ads">Dán mẫu</button>
+              <button class="button primary" type="submit">Nhập ads</button>
+            </div>
+            <p class="import-result"></p>
+          </form>
+        </div>
+      </section>
+
       <section class="layout">
         <div class="panel wide">
           <div class="panel-heading">
