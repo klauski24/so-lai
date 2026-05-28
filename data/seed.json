@@ -3,6 +3,19 @@
     "version": 1,
     "updatedAt": "2026-05-28T00:00:00.000Z"
   },
+  "shop": {
+    "name": "Shop Demo",
+    "owner": "Chu shop",
+    "category": "My pham, phu kien va do gia dung nho",
+    "currency": "VND",
+    "channels": [
+      "TikTok Shop",
+      "Shopee",
+      "Facebook",
+      "Zalo"
+    ],
+    "dataNote": "So lieu demo. Khi dung that, chu shop nhap tu bao cao don hang cua san, so doi soat COD, chi phi quang cao va gia von san pham."
+  },
   "products": [
     {
       "id": "sku-lip-velvet",

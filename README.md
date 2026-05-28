@@ -1,54 +1,66 @@
-# ProfitLens
+# Sổ Lãi
 
-ProfitLens is a local-first profit dashboard for small online sellers. It helps sellers understand real profit after product cost, platform fees, shipping subsidies, discounts, ad spend, COD status, cancellations, and returns.
+Sổ Lãi là công cụ local-first giúp shop online nhỏ ở Việt Nam biết **lãi thật** sau khi trừ giá vốn, phí sàn, ship shop chịu, voucher/giảm giá, quảng cáo, hoàn hàng và COD chưa đối soát.
 
-The app is built for small shops selling across TikTok Shop, Shopee, Facebook, Zalo, livestreams, and manual COD flows. It focuses on one practical question: is the shop actually profitable after all hidden costs?
+Đây không phải website giới thiệu, CRM hay POS đầy đủ. MVP chỉ tập trung vào một câu hỏi thực tế:
 
-## Features
+```text
+Shop tháng này thật sự lời hay lỗ?
+```
 
-- Real profit dashboard with revenue, net profit, margin, COD pending, and return rate.
-- Product-level profit analysis with loss and thin-margin flags.
-- Channel comparison for TikTok Shop, Shopee, Facebook, Zalo, and manual sales.
-- COD pending tracker to show unreconciled delivered orders.
-- Return and cancellation handling in profit calculations.
-- Manual order entry for fast testing.
-- CSV export for orders.
-- Markdown export for monthly reporting.
-- Local JSON storage with seed/reset flow.
+## Số liệu lấy từ đâu?
 
-## Why This Exists
+Ứng dụng không tự bịa số. Chủ shop cần nhập tay hoặc nhập từ các file báo cáo đang có:
 
-Vietnamese social commerce and e-commerce are growing quickly, but many small sellers still manage cost, COD, ads, and return data in scattered spreadsheets. Revenue can look healthy while true margin is negative.
+- Báo cáo đơn hàng từ Shopee, TikTok Shop, Facebook, Zalo hoặc file chốt livestream.
+- Giá vốn từng SKU từ file nhập hàng, sổ kho hoặc hóa đơn nhập hàng.
+- Phí sàn, phí thanh toán, voucher, ship shop chịu từ báo cáo sàn.
+- Chi phí quảng cáo từ TikTok Ads, Shopee Ads, Facebook Ads.
+- COD đã nhận/chưa nhận từ đơn vị vận chuyển, sàn hoặc sao kê ngân hàng.
+- Trạng thái đơn: đã giao, hoàn hàng, đã hủy.
 
-ProfitLens keeps the MVP narrow: it is not a full POS, CRM, or inventory system. It is a profit visibility tool.
+Bản hiện tại có form nhập đơn thủ công để chứng minh workflow. Bước tiếp theo hợp lý là thêm import CSV cho từng mẫu file Shopee/TikTok.
 
-## Run Locally
+## Tính năng MVP
+
+- Thiết lập thông tin shop: tên shop, chủ shop, ngành hàng.
+- Dashboard doanh thu, lãi/lỗ thật, biên lãi ròng, COD treo, tỷ lệ hoàn.
+- Phân tích lãi theo kênh bán.
+- Phân tích lãi theo SKU/sản phẩm.
+- Cảnh báo sản phẩm đang lỗ, COD treo cao, tỷ lệ hoàn cao.
+- Nhập đơn hàng thủ công.
+- Xuất CSV đơn hàng.
+- Xuất báo cáo Markdown.
+- Chạy local, không cần tài khoản, không cần API trả phí.
+
+## Cách chạy
 
 ```powershell
 cd "C:\Users\Administrator\Documents\Codex\thon"
 npm start
 ```
 
-Open:
+Mở:
 
 ```text
 http://127.0.0.1:4182
 ```
 
-Reset demo data:
+Reset dữ liệu demo:
 
 ```powershell
 npm run seed
 ```
 
-## Data Model
+## Data model
 
-- `products`: SKU, product name, category, unit cost, target margin.
-- `orders`: channel, SKU, quantity, sale price, platform fee, shipping fee, discount, COD status, delivery status.
-- `adCosts`: campaign-level ad spend assigned to a SKU and channel.
+- `shop`: thông tin shop.
+- `products`: SKU, tên sản phẩm, ngành hàng, giá vốn, biên mục tiêu.
+- `orders`: kênh bán, SKU, số lượng, giá bán, phí sàn, ship, giảm giá, COD, trạng thái đơn.
+- `adCosts`: chi phí quảng cáo theo chiến dịch, kênh và SKU.
 
-Runtime data is stored in `data/db.json`, which is intentionally ignored by Git. The demo seed lives in `data/seed.json`.
+Runtime database nằm ở `data/db.json` và được ignore khỏi Git. Dữ liệu demo nằm ở `data/seed.json`.
 
-## MVP Scope
+## Vì sao thực tế?
 
-This version intentionally avoids paid APIs and platform integrations. Sellers can enter data manually or adapt exports later. The next practical step would be importing Shopee/TikTok CSV files and mapping columns to ProfitLens fields.
+Nhiều shop nhỏ nhìn doanh thu trên sàn nhưng không biết lãi thật vì dữ liệu nằm rải rác: báo cáo đơn hàng, đối soát COD, chi phí ads, giá vốn và hoàn hàng. Sổ Lãi gom các phần đó vào một bảng tính vận hành đơn giản để chủ shop ra quyết định: tăng ads, dừng SKU lỗ, giảm voucher, siết COD hay đổi giá bán.

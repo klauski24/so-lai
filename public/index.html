@@ -1,51 +1,93 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ProfitLens</title>
+    <title>Sổ Lãi</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
     <header class="app-header">
       <div>
-        <p class="eyebrow">Local-first seller analytics</p>
-        <h1>ProfitLens</h1>
-        <p class="subtitle">Track real profit across orders, COD, returns, shipping, platform fees, and ad spend.</p>
+        <p class="eyebrow">Công cụ tính lãi thật cho shop online</p>
+        <h1>Sổ Lãi</h1>
+        <p class="subtitle">Nhập doanh thu, giá vốn, phí sàn, ship, hoàn hàng, COD và quảng cáo để biết shop đang lời hay lỗ thật.</p>
       </div>
       <div class="header-actions">
-        <a class="button secondary" href="/api/export/orders.csv">Export CSV</a>
-        <a class="button secondary" href="/api/export/report.md">Export Report</a>
-        <button class="button ghost" id="resetButton" type="button">Reset Demo</button>
+        <a class="button secondary" href="/api/export/orders.csv">Xuất CSV</a>
+        <a class="button secondary" href="/api/export/report.md">Xuất báo cáo</a>
+        <button class="button ghost" id="resetButton" type="button">Reset demo</button>
       </div>
     </header>
 
     <main>
-      <section class="metrics-grid" aria-label="Business metrics">
+      <section class="layout">
+        <div class="panel wide">
+          <div class="panel-heading">
+            <div>
+              <h2 id="shopTitle">Thông tin shop</h2>
+              <p id="shopMeta">Thiết lập shop trước, sau đó nhập đơn hàng và chi phí.</p>
+            </div>
+          </div>
+          <form id="shopForm" class="shop-form">
+            <label>
+              Tên shop
+              <input name="name" id="shopName" placeholder="Ví dụ: Mây Beauty">
+            </label>
+            <label>
+              Chủ shop
+              <input name="owner" id="shopOwner" placeholder="Tên người phụ trách">
+            </label>
+            <label>
+              Ngành hàng
+              <input name="category" id="shopCategory" placeholder="Mỹ phẩm, phụ kiện, thời trang...">
+            </label>
+            <button class="button primary inline" type="submit">Lưu shop</button>
+          </form>
+        </div>
+
+        <aside class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Số liệu lấy từ đâu?</h2>
+              <p>App không tự bịa số. Chủ shop nhập hoặc import từ các nguồn này.</p>
+            </div>
+          </div>
+          <ul class="source-list">
+            <li>Báo cáo đơn hàng Shopee/TikTok Shop/Facebook/Zalo</li>
+            <li>Giá vốn từng SKU từ file nhập hàng hoặc sổ kho</li>
+            <li>Phí sàn, voucher, ship shop chịu từ báo cáo sàn</li>
+            <li>Chi phí quảng cáo từ TikTok Ads, Shopee Ads, Facebook Ads</li>
+            <li>COD đã nhận/chưa nhận từ đơn vị vận chuyển hoặc sao kê</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="metrics-grid" aria-label="Chỉ số kinh doanh">
         <article class="metric">
-          <span>Gross Revenue</span>
+          <span>Doanh thu ghi nhận</span>
           <strong id="grossRevenue">-</strong>
-          <small>Total non-cancelled sales</small>
+          <small>Không tính đơn đã hủy</small>
         </article>
         <article class="metric accent">
-          <span>Net Profit</span>
+          <span>Lãi/lỗ thật</span>
           <strong id="netProfit">-</strong>
-          <small>After COGS, fees, shipping, discounts, ads</small>
+          <small>Sau giá vốn, phí, ship, giảm giá, ads</small>
         </article>
         <article class="metric">
-          <span>Net Margin</span>
+          <span>Biên lãi ròng</span>
           <strong id="netMargin">-</strong>
-          <small>Profit divided by revenue</small>
+          <small>Lãi thật chia doanh thu</small>
         </article>
         <article class="metric warning">
-          <span>COD Pending</span>
+          <span>COD chưa đối soát</span>
           <strong id="codPending">-</strong>
-          <small>Delivered orders not reconciled</small>
+          <small>Đơn đã giao nhưng tiền chưa về</small>
         </article>
         <article class="metric">
-          <span>Return Rate</span>
+          <span>Tỷ lệ hoàn</span>
           <strong id="returnRate">-</strong>
-          <small>Returned orders / total orders</small>
+          <small>Đơn hoàn / tổng đơn</small>
         </article>
       </section>
 
@@ -53,8 +95,8 @@
         <div class="panel wide">
           <div class="panel-heading">
             <div>
-              <h2>Profit by Channel</h2>
-              <p>See where revenue is coming from and which channel is hiding COD risk.</p>
+              <h2>Lãi theo kênh</h2>
+              <p>So sánh Shopee, TikTok Shop, Facebook, Zalo để thấy kênh nào đang treo COD hoặc lỗ sau phí.</p>
             </div>
           </div>
           <div id="channelBars" class="bar-list"></div>
@@ -63,8 +105,8 @@
         <aside class="panel">
           <div class="panel-heading">
             <div>
-              <h2>Risk Alerts</h2>
-              <p>Rules that point to profit leaks.</p>
+              <h2>Cảnh báo</h2>
+              <p>Các dấu hiệu làm shop nhìn có doanh thu nhưng không có lãi.</p>
             </div>
           </div>
           <div id="alerts" class="alerts"></div>
@@ -75,8 +117,8 @@
         <div class="panel wide">
           <div class="panel-heading">
             <div>
-              <h2>Products</h2>
-              <p>Products that sell well can still lose money after ads and returns.</p>
+              <h2>Sản phẩm</h2>
+              <p>Một sản phẩm bán nhiều vẫn có thể lỗ nếu giá vốn, ads, ship và hoàn hàng quá cao.</p>
             </div>
           </div>
           <div class="table-wrap">
@@ -84,12 +126,12 @@
               <thead>
                 <tr>
                   <th>SKU</th>
-                  <th>Product</th>
-                  <th>Units</th>
-                  <th>Revenue</th>
-                  <th>Net Profit</th>
-                  <th>Margin</th>
-                  <th>Status</th>
+                  <th>Sản phẩm</th>
+                  <th>SL</th>
+                  <th>Doanh thu</th>
+                  <th>Lãi/lỗ</th>
+                  <th>Biên</th>
+                  <th>Trạng thái</th>
                 </tr>
               </thead>
               <tbody id="productsBody"></tbody>
@@ -100,71 +142,71 @@
         <aside class="panel">
           <div class="panel-heading">
             <div>
-              <h2>Add Order</h2>
-              <p>Add one manual order to test the calculator.</p>
+              <h2>Nhập đơn hàng</h2>
+              <p>Đây là nơi shop điền số liệu thật nếu chưa import CSV.</p>
             </div>
           </div>
           <form id="orderForm" class="stacked-form">
             <label>
-              Date
+              Ngày
               <input name="date" type="date" required>
             </label>
             <label>
-              Channel
+              Kênh bán
               <select name="channel">
                 <option>TikTok Shop</option>
                 <option>Shopee</option>
                 <option>Facebook</option>
                 <option>Zalo</option>
-                <option>Manual</option>
+                <option>Nhập tay</option>
               </select>
             </label>
             <label>
-              Product
+              Sản phẩm
               <select name="sku" id="skuSelect"></select>
             </label>
             <div class="form-grid">
               <label>
-                Qty
+                Số lượng
                 <input name="quantity" type="number" min="1" value="1" required>
               </label>
               <label>
-                Sale Price
+                Giá bán/đơn vị
                 <input name="salePrice" type="number" min="0" value="99000" required>
               </label>
             </div>
             <div class="form-grid">
               <label>
-                Fee
+                Phí sàn
                 <input name="platformFee" type="number" min="0" value="0">
               </label>
               <label>
-                Shipping
+                Ship shop chịu
                 <input name="shippingFee" type="number" min="0" value="0">
               </label>
             </div>
             <div class="form-grid">
               <label>
-                Discount
+                Giảm giá/voucher
                 <input name="discount" type="number" min="0" value="0">
               </label>
               <label>
-                Status
+                Trạng thái đơn
                 <select name="status">
-                  <option value="delivered">Delivered</option>
-                  <option value="returned">Returned</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="delivered">Đã giao</option>
+                  <option value="returned">Hoàn hàng</option>
+                  <option value="cancelled">Đã hủy</option>
                 </select>
               </label>
             </div>
             <label>
               COD
               <select name="codStatus">
-                <option value="received">Received</option>
-                <option value="pending">Pending</option>
+                <option value="received">Đã nhận tiền</option>
+                <option value="pending">Chưa đối soát</option>
               </select>
             </label>
-            <button class="button primary" type="submit">Add Order</button>
+            <button class="button primary" type="submit">Thêm đơn</button>
           </form>
         </aside>
       </section>
@@ -172,24 +214,24 @@
       <section class="panel">
         <div class="panel-heading">
           <div>
-            <h2>Recent Orders</h2>
-            <p>Net profit includes a fair share of ad spend by SKU.</p>
+            <h2>Đơn gần đây</h2>
+            <p>Lãi/lỗ từng đơn đã phân bổ chi phí quảng cáo theo SKU.</p>
           </div>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Order</th>
-                <th>Date</th>
-                <th>Channel</th>
-                <th>Product</th>
-                <th>Revenue</th>
-                <th>COGS</th>
+                <th>Mã đơn</th>
+                <th>Ngày</th>
+                <th>Kênh</th>
+                <th>Sản phẩm</th>
+                <th>Doanh thu</th>
+                <th>Giá vốn</th>
                 <th>Ads</th>
-                <th>Status</th>
+                <th>Trạng thái</th>
                 <th>COD</th>
-                <th>Net Profit</th>
+                <th>Lãi/lỗ</th>
               </tr>
             </thead>
             <tbody id="ordersBody"></tbody>

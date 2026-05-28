@@ -1,8 +1,8 @@
 {
-  "name": "profitlens",
+  "name": "so-lai",
   "version": "1.0.0",
   "private": true,
-  "description": "Local-first profit dashboard for small online sellers tracking orders, COD, returns, ads, and real margin.",
+  "description": "Bang tinh lai that local-first cho shop online nho: don hang, COD, hoan hang, ads va bien loi nhuan.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

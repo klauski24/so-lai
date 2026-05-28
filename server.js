@@ -184,15 +184,16 @@ function summarize(db) {
   }));
 
   const alerts = [];
-  if (totals.netProfit < 0) alerts.push({ type: "danger", text: "Shop is losing money after ads, returns, fees, and shipping." });
-  if (totals.codPending > totals.grossRevenue * 0.2) alerts.push({ type: "warning", text: "COD pending is high. Reconcile cash before increasing ad spend." });
-  if (totals.returnRate > 0.08) alerts.push({ type: "warning", text: "Return rate is above 8%. Check product pages and COD confirmation flow." });
+  if (totals.netProfit < 0) alerts.push({ type: "danger", text: "Shop đang lỗ sau khi trừ giá vốn, ads, phí sàn, ship và hoàn hàng." });
+  if (totals.codPending > totals.grossRevenue * 0.2) alerts.push({ type: "warning", text: "COD chưa đối soát đang cao. Nên chốt tiền về trước khi tăng ngân sách ads." });
+  if (totals.returnRate > 0.08) alerts.push({ type: "warning", text: "Tỷ lệ hoàn trên 8%. Cần kiểm tra mô tả sản phẩm, tư vấn trước khi gửi và xác nhận COD." });
   for (const product of products.filter((item) => item.status === "loss")) {
-    alerts.push({ type: "danger", text: `${product.name} is losing money. Review pricing, ad spend, or shipping subsidies.` });
+    alerts.push({ type: "danger", text: `${product.name} đang lỗ. Cần xem lại giá bán, ads, voucher hoặc ship shop chịu.` });
   }
-  if (!alerts.length) alerts.push({ type: "success", text: "Core metrics look stable. Keep watching ad spend and pending COD." });
+  if (!alerts.length) alerts.push({ type: "success", text: "Các chỉ số chính đang ổn. Tiếp tục theo dõi ads và COD chưa đối soát." });
 
   return {
+    shop: db.shop || {},
     meta: db.meta,
     totals,
     products: products.sort((a, b) => b.netProfit - a.netProfit),
@@ -216,31 +217,31 @@ function ordersCsv(summary) {
 function markdownReport(summary) {
   const t = summary.totals;
   const lines = [
-    "# ProfitLens Monthly Report",
+    `# Bao cao lai that - ${summary.shop?.name || "Shop"}`,
     "",
     `Generated: ${new Date().toLocaleString("en-US")}`,
     "",
-    "## Summary",
+    "## Tong quan",
     "",
-    `- Gross revenue: ${Math.round(t.grossRevenue).toLocaleString("vi-VN")} VND`,
-    `- Net profit: ${Math.round(t.netProfit).toLocaleString("vi-VN")} VND`,
-    `- Net margin: ${(t.netMargin * 100).toFixed(1)}%`,
-    `- COD pending: ${Math.round(t.codPending).toLocaleString("vi-VN")} VND`,
-    `- Return rate: ${(t.returnRate * 100).toFixed(1)}%`,
+    `- Doanh thu ghi nhan: ${Math.round(t.grossRevenue).toLocaleString("vi-VN")} VND`,
+    `- Lai/lo that: ${Math.round(t.netProfit).toLocaleString("vi-VN")} VND`,
+    `- Bien loi nhuan rong: ${(t.netMargin * 100).toFixed(1)}%`,
+    `- COD chua doi soat: ${Math.round(t.codPending).toLocaleString("vi-VN")} VND`,
+    `- Ty le hoan: ${(t.returnRate * 100).toFixed(1)}%`,
     "",
-    "## Alerts",
+    "## Canh bao",
     "",
     ...summary.alerts.map((alert) => `- ${alert.text}`),
     "",
-    "## Product Profit",
+    "## Lai theo san pham",
     "",
-    "| SKU | Product | Revenue | Net profit | Margin |",
+    "| SKU | San pham | Doanh thu | Lai/lo | Bien |",
     "| --- | --- | ---: | ---: | ---: |",
     ...summary.products.map((p) => `| ${p.sku} | ${p.name} | ${Math.round(p.revenue).toLocaleString("vi-VN")} | ${Math.round(p.netProfit).toLocaleString("vi-VN")} | ${(p.margin * 100).toFixed(1)}% |`),
     "",
-    "## Channel Profit",
+    "## Lai theo kenh",
     "",
-    "| Channel | Orders | Revenue | COD pending | Net profit |",
+    "| Kenh | Don | Doanh thu | COD treo | Lai/lo |",
     "| --- | ---: | ---: | ---: | ---: |",
     ...summary.channels.map((c) => `| ${c.channel} | ${c.orders} | ${Math.round(c.revenue).toLocaleString("vi-VN")} | ${Math.round(c.codPending).toLocaleString("vi-VN")} | ${Math.round(c.netProfit).toLocaleString("vi-VN")} |`)
   ];
@@ -261,6 +262,20 @@ async function handleApi(req, res) {
 
   if (req.method === "GET" && url.pathname === "/api/data") {
     return send(res, 200, db);
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/shop") {
+    const body = JSON.parse(await collectBody(req) || "{}");
+    db.shop = {
+      ...(db.shop || {}),
+      name: body.name || db.shop?.name || "Shop",
+      owner: body.owner || "",
+      category: body.category || "",
+      currency: "VND",
+      dataNote: body.dataNote || db.shop?.dataNote || ""
+    };
+    writeDb(db);
+    return send(res, 200, db.shop);
   }
 
   if (req.method === "POST" && url.pathname === "/api/orders") {
@@ -319,11 +334,11 @@ async function handleApi(req, res) {
   }
 
   if (req.method === "GET" && url.pathname === "/api/export/orders.csv") {
-    return send(res, 200, ordersCsv(summarize(db)), { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": "attachment; filename=profitlens-orders.csv" });
+    return send(res, 200, ordersCsv(summarize(db)), { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": "attachment; filename=so-lai-orders.csv" });
   }
 
   if (req.method === "GET" && url.pathname === "/api/export/report.md") {
-    return send(res, 200, markdownReport(summarize(db)), { "Content-Type": "text/markdown; charset=utf-8", "Content-Disposition": "attachment; filename=profitlens-report.md" });
+    return send(res, 200, markdownReport(summarize(db)), { "Content-Type": "text/markdown; charset=utf-8", "Content-Disposition": "attachment; filename=bao-cao-lai-that.md" });
   }
 
   return send(res, 404, { error: "Not found" });
@@ -365,5 +380,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, () => {
-  console.log(`ProfitLens running at http://127.0.0.1:${port}`);
+  console.log(`So Lai running at http://127.0.0.1:${port}`);
 });

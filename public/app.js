@@ -14,6 +14,17 @@ const state = {
   summary: null
 };
 
+const statusLabels = {
+  delivered: "Đã giao",
+  returned: "Hoàn hàng",
+  cancelled: "Đã hủy",
+  received: "Đã nhận",
+  pending: "Chưa nhận",
+  loss: "lỗ",
+  thin: "mỏng",
+  healthy: "ổn"
+};
+
 function formatMoney(value) {
   return currency.format(Math.round(Number(value || 0)));
 }
@@ -46,6 +57,15 @@ async function load() {
   render();
 }
 
+function renderShop() {
+  const shop = state.data.shop || {};
+  document.querySelector("#shopTitle").textContent = shop.name ? `Thông tin shop: ${shop.name}` : "Thông tin shop";
+  document.querySelector("#shopMeta").textContent = [shop.category, shop.owner ? `phụ trách: ${shop.owner}` : ""].filter(Boolean).join(" · ") || "Thiết lập shop trước, sau đó nhập đơn hàng và chi phí.";
+  document.querySelector("#shopName").value = shop.name || "";
+  document.querySelector("#shopOwner").value = shop.owner || "";
+  document.querySelector("#shopCategory").value = shop.category || "";
+}
+
 function renderMetrics() {
   const { totals } = state.summary;
   document.querySelector("#grossRevenue").textContent = formatMoney(totals.grossRevenue);
@@ -72,7 +92,7 @@ function renderChannels() {
         </div>
         <div class="bar-row">
           <div class="bar-label"></div>
-          <div class="muted">Net ${formatMoney(channel.netProfit)} · COD ${formatMoney(channel.codPending)} · Returns ${channel.returns}</div>
+          <div class="muted">Lãi ${formatMoney(channel.netProfit)} - COD treo ${formatMoney(channel.codPending)} - Hoàn ${channel.returns}</div>
           <div class="bar-value">${formatPercent(channel.margin)}</div>
         </div>
       `;
@@ -97,7 +117,7 @@ function renderProducts() {
         <td class="numeric">${formatMoney(product.revenue)}</td>
         <td class="numeric ${classForNumber(product.netProfit)}">${formatMoney(product.netProfit)}</td>
         <td class="numeric">${formatPercent(product.margin)}</td>
-        <td><span class="pill ${product.status}">${product.status}</span></td>
+        <td><span class="pill ${product.status}">${statusLabels[product.status]}</span></td>
       </tr>
     `
     )
@@ -116,8 +136,8 @@ function renderOrders() {
         <td class="numeric">${formatMoney(order.grossRevenue)}</td>
         <td class="numeric">${formatMoney(order.costOfGoods)}</td>
         <td class="numeric">${formatMoney(order.adShare)}</td>
-        <td><span class="pill">${order.status}</span></td>
-        <td><span class="pill ${order.codStatus === "pending" ? "thin" : "healthy"}">${order.codStatus}</span></td>
+        <td><span class="pill">${statusLabels[order.status] || order.status}</span></td>
+        <td><span class="pill ${order.codStatus === "pending" ? "thin" : "healthy"}">${statusLabels[order.codStatus] || order.codStatus}</span></td>
         <td class="numeric ${classForNumber(order.netProfit)}">${formatMoney(order.netProfit)}</td>
       </tr>
     `
@@ -129,12 +149,13 @@ function renderSkuSelect() {
   const select = document.querySelector("#skuSelect");
   const current = select.value;
   select.innerHTML = state.data.products
-    .map((product) => `<option value="${product.sku}">${product.sku} · ${product.name}</option>`)
+    .map((product) => `<option value="${product.sku}">${product.sku} - ${product.name}</option>`)
     .join("");
   if (current) select.value = current;
 }
 
 function render() {
+  renderShop();
   renderMetrics();
   renderChannels();
   renderAlerts();
@@ -146,6 +167,15 @@ function render() {
 function formToObject(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
+
+document.querySelector("#shopForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await api("/api/shop", {
+    method: "POST",
+    body: JSON.stringify(formToObject(event.currentTarget))
+  });
+  await load();
+});
 
 document.querySelector("#orderForm").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -166,5 +196,5 @@ document.querySelector("#resetButton").addEventListener("click", async () => {
 
 document.querySelector("#orderForm").elements.date.value = new Date().toISOString().slice(0, 10);
 load().catch((error) => {
-  document.body.innerHTML = `<main><section class="panel"><h1>ProfitLens failed to load</h1><p>${error.message}</p></section></main>`;
+  document.body.innerHTML = `<main><section class="panel"><h1>Sổ Lãi không tải được</h1><p>${error.message}</p></section></main>`;
 });
