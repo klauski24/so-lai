@@ -1,0 +1,240 @@
+{
+  "meta": {
+    "version": 1,
+    "updatedAt": "2026-05-28T00:00:00.000Z"
+  },
+  "products": [
+    {
+      "id": "sku-lip-velvet",
+      "sku": "LIP-VELVET",
+      "name": "Son kem Velvet Mini",
+      "category": "Beauty",
+      "cost": 72000,
+      "targetMargin": 0.28
+    },
+    {
+      "id": "sku-tote-canvas",
+      "sku": "TOTE-CANVAS",
+      "name": "Tui tote canvas basic",
+      "category": "Fashion",
+      "cost": 54000,
+      "targetMargin": 0.25
+    },
+    {
+      "id": "sku-led-mirror",
+      "sku": "LED-MIRROR",
+      "name": "Guong trang diem LED",
+      "category": "Home",
+      "cost": 165000,
+      "targetMargin": 0.22
+    },
+    {
+      "id": "sku-hair-clip",
+      "sku": "HAIR-CLIP",
+      "name": "Set kep toc Han Quoc",
+      "category": "Accessories",
+      "cost": 18000,
+      "targetMargin": 0.35
+    },
+    {
+      "id": "sku-sunscreen",
+      "sku": "SUNSCREEN",
+      "name": "Kem chong nang travel size",
+      "category": "Beauty",
+      "cost": 89000,
+      "targetMargin": 0.3
+    }
+  ],
+  "orders": [
+    {
+      "id": "ORD-1001",
+      "date": "2026-05-01",
+      "channel": "TikTok Shop",
+      "sku": "LIP-VELVET",
+      "quantity": 3,
+      "salePrice": 129000,
+      "platformFee": 31000,
+      "shippingFee": 18000,
+      "discount": 15000,
+      "codStatus": "received",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1002",
+      "date": "2026-05-02",
+      "channel": "Shopee",
+      "sku": "TOTE-CANVAS",
+      "quantity": 2,
+      "salePrice": 99000,
+      "platformFee": 17000,
+      "shippingFee": 12000,
+      "discount": 10000,
+      "codStatus": "received",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1003",
+      "date": "2026-05-03",
+      "channel": "Facebook",
+      "sku": "LED-MIRROR",
+      "quantity": 1,
+      "salePrice": 259000,
+      "platformFee": 0,
+      "shippingFee": 26000,
+      "discount": 0,
+      "codStatus": "pending",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1004",
+      "date": "2026-05-04",
+      "channel": "TikTok Shop",
+      "sku": "HAIR-CLIP",
+      "quantity": 5,
+      "salePrice": 39000,
+      "platformFee": 19000,
+      "shippingFee": 15000,
+      "discount": 12000,
+      "codStatus": "received",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1005",
+      "date": "2026-05-05",
+      "channel": "Shopee",
+      "sku": "SUNSCREEN",
+      "quantity": 2,
+      "salePrice": 149000,
+      "platformFee": 29000,
+      "shippingFee": 18000,
+      "discount": 18000,
+      "codStatus": "received",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1006",
+      "date": "2026-05-06",
+      "channel": "Zalo",
+      "sku": "LED-MIRROR",
+      "quantity": 1,
+      "salePrice": 239000,
+      "platformFee": 0,
+      "shippingFee": 30000,
+      "discount": 0,
+      "codStatus": "pending",
+      "status": "returned"
+    },
+    {
+      "id": "ORD-1007",
+      "date": "2026-05-07",
+      "channel": "TikTok Shop",
+      "sku": "LIP-VELVET",
+      "quantity": 2,
+      "salePrice": 119000,
+      "platformFee": 21000,
+      "shippingFee": 15000,
+      "discount": 10000,
+      "codStatus": "received",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1008",
+      "date": "2026-05-08",
+      "channel": "Shopee",
+      "sku": "HAIR-CLIP",
+      "quantity": 8,
+      "salePrice": 35000,
+      "platformFee": 24000,
+      "shippingFee": 18000,
+      "discount": 22000,
+      "codStatus": "received",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1009",
+      "date": "2026-05-09",
+      "channel": "Facebook",
+      "sku": "TOTE-CANVAS",
+      "quantity": 3,
+      "salePrice": 89000,
+      "platformFee": 0,
+      "shippingFee": 25000,
+      "discount": 0,
+      "codStatus": "pending",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1010",
+      "date": "2026-05-10",
+      "channel": "TikTok Shop",
+      "sku": "SUNSCREEN",
+      "quantity": 1,
+      "salePrice": 139000,
+      "platformFee": 15000,
+      "shippingFee": 12000,
+      "discount": 8000,
+      "codStatus": "received",
+      "status": "cancelled"
+    },
+    {
+      "id": "ORD-1011",
+      "date": "2026-05-11",
+      "channel": "TikTok Shop",
+      "sku": "LED-MIRROR",
+      "quantity": 2,
+      "salePrice": 249000,
+      "platformFee": 45000,
+      "shippingFee": 36000,
+      "discount": 20000,
+      "codStatus": "received",
+      "status": "delivered"
+    },
+    {
+      "id": "ORD-1012",
+      "date": "2026-05-12",
+      "channel": "Shopee",
+      "sku": "LIP-VELVET",
+      "quantity": 4,
+      "salePrice": 115000,
+      "platformFee": 41000,
+      "shippingFee": 22000,
+      "discount": 30000,
+      "codStatus": "received",
+      "status": "delivered"
+    }
+  ],
+  "adCosts": [
+    {
+      "id": "ADS-01",
+      "date": "2026-05-01",
+      "channel": "TikTok Shop",
+      "campaign": "Live launch lipstick",
+      "amount": 250000,
+      "sku": "LIP-VELVET"
+    },
+    {
+      "id": "ADS-02",
+      "date": "2026-05-04",
+      "channel": "TikTok Shop",
+      "campaign": "Accessories flash sale",
+      "amount": 180000,
+      "sku": "HAIR-CLIP"
+    },
+    {
+      "id": "ADS-03",
+      "date": "2026-05-05",
+      "channel": "Shopee",
+      "campaign": "Search sunscreen",
+      "amount": 130000,
+      "sku": "SUNSCREEN"
+    },
+    {
+      "id": "ADS-04",
+      "date": "2026-05-09",
+      "channel": "Facebook",
+      "campaign": "Tote retargeting",
+      "amount": 90000,
+      "sku": "TOTE-CANVAS"
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ProfitLens</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Local-first seller analytics</p>
+        <h1>ProfitLens</h1>
+        <p class="subtitle">Track real profit across orders, COD, returns, shipping, platform fees, and ad spend.</p>
+      </div>
+      <div class="header-actions">
+        <a class="button secondary" href="/api/export/orders.csv">Export CSV</a>
+        <a class="button secondary" href="/api/export/report.md">Export Report</a>
+        <button class="button ghost" id="resetButton" type="button">Reset Demo</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="metrics-grid" aria-label="Business metrics">
+        <article class="metric">
+          <span>Gross Revenue</span>
+          <strong id="grossRevenue">-</strong>
+          <small>Total non-cancelled sales</small>
+        </article>
+        <article class="metric accent">
+          <span>Net Profit</span>
+          <strong id="netProfit">-</strong>
+          <small>After COGS, fees, shipping, discounts, ads</small>
+        </article>
+        <article class="metric">
+          <span>Net Margin</span>
+          <strong id="netMargin">-</strong>
+          <small>Profit divided by revenue</small>
+        </article>
+        <article class="metric warning">
+          <span>COD Pending</span>
+          <strong id="codPending">-</strong>
+          <small>Delivered orders not reconciled</small>
+        </article>
+        <article class="metric">
+          <span>Return Rate</span>
+          <strong id="returnRate">-</strong>
+          <small>Returned orders / total orders</small>
+        </article>
+      </section>
+
+      <section class="layout">
+        <div class="panel wide">
+          <div class="panel-heading">
+            <div>
+              <h2>Profit by Channel</h2>
+              <p>See where revenue is coming from and which channel is hiding COD risk.</p>
+            </div>
+          </div>
+          <div id="channelBars" class="bar-list"></div>
+        </div>
+
+        <aside class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Risk Alerts</h2>
+              <p>Rules that point to profit leaks.</p>
+            </div>
+          </div>
+          <div id="alerts" class="alerts"></div>
+        </aside>
+      </section>
+
+      <section class="layout">
+        <div class="panel wide">
+          <div class="panel-heading">
+            <div>
+              <h2>Products</h2>
+              <p>Products that sell well can still lose money after ads and returns.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Product</th>
+                  <th>Units</th>
+                  <th>Revenue</th>
+                  <th>Net Profit</th>
+                  <th>Margin</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="productsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Add Order</h2>
+              <p>Add one manual order to test the calculator.</p>
+            </div>
+          </div>
+          <form id="orderForm" class="stacked-form">
+            <label>
+              Date
+              <input name="date" type="date" required>
+            </label>
+            <label>
+              Channel
+              <select name="channel">
+                <option>TikTok Shop</option>
+                <option>Shopee</option>
+                <option>Facebook</option>
+                <option>Zalo</option>
+                <option>Manual</option>
+              </select>
+            </label>
+            <label>
+              Product
+              <select name="sku" id="skuSelect"></select>
+            </label>
+            <div class="form-grid">
+              <label>
+                Qty
+                <input name="quantity" type="number" min="1" value="1" required>
+              </label>
+              <label>
+                Sale Price
+                <input name="salePrice" type="number" min="0" value="99000" required>
+              </label>
+            </div>
+            <div class="form-grid">
+              <label>
+                Fee
+                <input name="platformFee" type="number" min="0" value="0">
+              </label>
+              <label>
+                Shipping
+                <input name="shippingFee" type="number" min="0" value="0">
+              </label>
+            </div>
+            <div class="form-grid">
+              <label>
+                Discount
+                <input name="discount" type="number" min="0" value="0">
+              </label>
+              <label>
+                Status
+                <select name="status">
+                  <option value="delivered">Delivered</option>
+                  <option value="returned">Returned</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              COD
+              <select name="codStatus">
+                <option value="received">Received</option>
+                <option value="pending">Pending</option>
+              </select>
+            </label>
+            <button class="button primary" type="submit">Add Order</button>
+          </form>
+        </aside>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Recent Orders</h2>
+            <p>Net profit includes a fair share of ad spend by SKU.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Date</th>
+                <th>Channel</th>
+                <th>Product</th>
+                <th>Revenue</th>
+                <th>COGS</th>
+                <th>Ads</th>
+                <th>Status</th>
+                <th>COD</th>
+                <th>Net Profit</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

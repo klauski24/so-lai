@@ -1,0 +1,15 @@
+{
+  "name": "profitlens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-first profit dashboard for small online sellers tracking orders, COD, returns, ads, and real margin.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "seed": "node server.js --seed"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
